@@ -27,7 +27,10 @@ class JoyCon:
         if product_id not in JOYCON_PRODUCT_IDS:
             raise ValueError(f'product_id is invalid: {product_id!r}')
         
-        if serial[:9] not in JOYCON_SERIAL_HEAD:
+        # Allow either standard serial format or non-standard MAC address format
+        is_standard_serial = serial[:12] in JOYCON_SERIAL_HEAD
+        is_mac_address = len(serial) == 17 and serial.count(':') == 5
+        if not (is_standard_serial or is_mac_address):
             raise ValueError(f'serial is invalid: {serial!r}')
 
         self.vendor_id   = vendor_id
@@ -35,7 +38,7 @@ class JoyCon:
         self.serial      = serial
         self.simple_mode = simple_mode  # TODO: It's for reporting mode 0x3f
         
-        if serial[:9] not in JOYCON_SERIAL_HEAD:
+        if serial[:12] not in JOYCON_SERIAL_HEAD:
             self.calibrate_value = True
         else:
             self.calibrate_value = False
@@ -215,9 +218,9 @@ class JoyCon:
             self._ACCEL_OFFSET_Z = offset_xyz
         if coeff_xyz:
             cx, cy, cz = coeff_xyz
-            self._ACCEL_COEFF_X = 0x4000 / cx if (cx != 0x4000 and cx != 0 and self.calibrate_value) else 1
-            self._ACCEL_COEFF_Y = 0x4000 / cy if (cy != 0x4000 and cy != 0 and self.calibrate_value) else 1
-            self._ACCEL_COEFF_Z = 0x4000 / cz if (cz != 0x4000 and cz != 0 and self.calibrate_value) else 1
+            self._ACCEL_COEFF_X = 0x4000 / cx if (cx != 0x4000 and cx != 0) else 1
+            self._ACCEL_COEFF_Y = 0x4000 / cy if (cy != 0x4000 and cy != 0) else 1
+            self._ACCEL_COEFF_Z = 0x4000 / cz if (cz != 0x4000 and cz != 0) else 1
 
     def register_update_hook(self, callback):
         self._input_hooks.append(callback)

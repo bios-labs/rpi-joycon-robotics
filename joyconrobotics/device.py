@@ -23,8 +23,10 @@ def get_device_ids(debug=False):
         if not product_string:
             continue
         
-        if serial[0:6] != '9c:54:':
-            return (0x057A, product_id, serial)
+        # 修复：移除有问题的早期返回逻辑
+        # 支持所有序列号格式，不只是 '9c:54:' 开头的
+        if debug and serial and serial[0:6] != '9c:54:':
+            print(f'非标准序列号格式: {serial=}')
         
         out.append((vendor_id, product_id, serial))
 

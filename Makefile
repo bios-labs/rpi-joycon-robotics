@@ -15,6 +15,8 @@ install_nintendo:
 	@rm -rf $(TEMP_DIR)/dkms-hid-nintendo
 	@mkdir -p $(TEMP_DIR)
 	@cd $(TEMP_DIR) && git clone $(NINTENDO_REPO)
+	@echo "Patching for kernel 6.10+ compatibility..."
+	@sed -i 's/#include <asm\/unaligned\.h>/#include <linux\/unaligned.h>/g' $(TEMP_DIR)/dkms-hid-nintendo/src/hid-nintendo.c
 	@echo "Removing any previous instances of the nintendo module..."
 	@cd $(TEMP_DIR)/dkms-hid-nintendo && sudo dkms remove nintendo -v $(DKMS_VERSION) --all || true
 	@echo "Checking for any existing nintendo modules..."
